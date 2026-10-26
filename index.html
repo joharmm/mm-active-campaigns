@@ -549,10 +549,11 @@ window.dash = (() => {
   const reload = () => ['lines', 'insights'].forEach(id => { try { dash.refresh(id); } catch (e) { /* settle() reports */ } });
   let pull = null;   // {until, sig} while a full pull runs: reload every minute until new files arrive
   async function startPull() {
-    const cfg = (state.insights || []).find(r => r.kind === 'config' && r.fire_url && r.fire_token);
+    // the relay: a GitHub Actions workflow that starts the Claude routine (browsers can't call the routine directly)
+    const cfg = (state.insights || []).find(r => r.kind === 'config' && r.dispatch_url && r.gh_token);
     if (!cfg) return false;
     try {
-      const res = await fetch(cfg.fire_url, { method: 'POST', headers: { 'Authorization': 'Bearer ' + cfg.fire_token, 'anthropic-beta': 'experimental-cc-routine-2026-04-01', 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' }, body: JSON.stringify({ text: 'Refresh tapped on the dashboard' }) });
+      const res = await fetch(cfg.dispatch_url, { method: 'POST', headers: { 'Authorization': 'Bearer ' + cfg.gh_token, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }, body: JSON.stringify({ ref: 'main' }) });
       if (!res.ok) throw new Error('HTTP ' + res.status);
     } catch (e) { return false; }
     pull = { until: Date.now() + 25 * 60000, sig: state.sig };
