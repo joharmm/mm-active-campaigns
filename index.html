@@ -261,6 +261,43 @@ window.dash = (() => {
   .mm-pbar b { position: absolute; top: -3px; bottom: -3px; width: 2px; border-radius: 1px; background: var(--mm-label); opacity: .55; }
   .mm-pbar.ok i { background: var(--mm-green); } .mm-pbar.watch i { background: var(--mm-orange); } .mm-pbar.flag i { background: var(--mm-red); }
   .mm-t a { color: var(--mm-blue); text-decoration: none; }
+
+  /* Phone layout: campaign groups with one card per channel */
+  .mm-cl { display: flex; flex-direction: column; gap: .625rem; margin-top: .875rem; }
+  .mm-cgroup { border-radius: var(--mm-radius-sm); box-shadow: 0 0 0 .5px var(--mm-sep); overflow: hidden; }
+  .mm-cgh { display: flex; align-items: center; gap: .625rem; width: 100%; min-height: 3.5rem; padding: .75rem; border: 0; background: var(--mm-card); cursor: pointer; text-align: left; }
+  .mm-cgh:active { background: var(--mm-fill); }
+  .mm-cgh .chev { color: var(--mm-label-3); font-size: .875rem; flex: none; }
+  .mm-cgroup.open .mm-cgh .chev { transform: rotate(90deg); }
+  .mm-cgh .gname { display: flex; flex-direction: column; gap: .1875rem; min-width: 0; flex: 1 1 auto; }
+  .mm-cgh .gname b { font-size: .9375rem; font-weight: 600; letter-spacing: -.006em; }
+  .mm-cgh .gname i { font-style: normal; font-size: .75rem; color: var(--mm-label-2); }
+  .mm-cgh .gside { display: flex; flex-direction: column; align-items: flex-end; gap: .3125rem; flex: none; }
+  .mm-cgh .gspend { font-size: .9375rem; font-weight: 600; white-space: nowrap; }
+  .mm-cgh .gspend small { font-size: .6875rem; font-weight: 500; color: var(--mm-label-2); margin-left: .25rem; }
+  .mm-cards { display: flex; flex-direction: column; gap: .5rem; padding: 0 .5rem .5rem; background: var(--mm-card); }
+  .mm-cc { background: var(--mm-fill-2); border-radius: .75rem; padding: .75rem; display: flex; flex-direction: column; gap: .625rem; scroll-margin: 5rem 0; }
+  .mm-cc.enter { animation: mmRowIn .32s cubic-bezier(.2, .8, .2, 1) both; }
+  .mm-cc.hl { animation: mmHlCard 2.6s ease-out; }
+  @keyframes mmHlCard { 0%, 45% { background: var(--mm-blue-tint); box-shadow: 0 0 0 2px var(--mm-blue); } 100% { background: var(--mm-fill-2); box-shadow: none; } }
+  .mm-cc-top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+  .mm-cc-top .mm-ch { font-weight: 600; font-size: .9375rem; white-space: normal; }
+  .mm-cc-main { display: flex; align-items: flex-end; justify-content: space-between; gap: .75rem; }
+  .mm-cc-spend b { display: block; font-size: 1.375rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; }
+  .mm-cc-spend span { font-size: .75rem; color: var(--mm-label-2); }
+  .mm-cc .mm-pace { flex-direction: column; align-items: flex-end; gap: .25rem; }
+  .mm-cc .mm-pace .mm-pbar { width: 6.5rem; }
+  .mm-cc .mm-pace span { font-size: .75rem; color: var(--mm-label-2); }
+  .mm-cc .mm-pace span b { color: var(--mm-label); font-size: .875rem; }
+  .mm-kv { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem .75rem; margin: 0; }
+  .mm-kv div { display: flex; flex-direction: column; gap: .0625rem; min-width: 0; }
+  .mm-kv dt { font-size: .6875rem; font-weight: 500; letter-spacing: .02em; text-transform: uppercase; color: var(--mm-label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mm-kv dd { margin: 0; font-size: .875rem; font-weight: 600; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mm-kv dd.neg { color: var(--mm-red); }
+  .mm-cc-note { font-size: .8125rem; line-height: 1.4; color: var(--mm-label-2); border-top: .5px solid var(--mm-sep); padding-top: .5rem; }
+  .mm-cc-note a { color: var(--mm-blue); text-decoration: none; white-space: nowrap; font-weight: 500; }
+  .mm-csect { margin: .5rem .25rem 0; font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--mm-label-2); }
+  @media (max-width: 22.5rem) { .mm-kv { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .mm-t .neg { color: var(--mm-red); }
   .mm-t tr.ch.hl td { animation: mmHl 2.6s ease-out; }
   @keyframes mmHl { 0%, 45% { background: var(--mm-blue-tint); } 100% { background: var(--mm-card); } }
@@ -325,7 +362,7 @@ window.dash = (() => {
       <div class="mm-titles">
         <span class="mm-eyebrow t-cap">Media Market · Digital Team</span>
         <h1 class="mm-title t-large" id="large-title">Active Campaigns</h1>
-        <span class="mm-updated t-foot"><span class="live"></span><span id="updated">Updated Oct 26, 2026, 09:15 Kuwait time · refreshes Sun–Thu at 9:00</span></span>
+        <span class="mm-updated t-foot"><span class="live"></span><span id="updated">Updated Oct 26, 2026, 14:18 Kuwait time · refreshes Sun–Thu at 9:00</span></span>
       </div>
     </header>
 
@@ -627,6 +664,8 @@ window.dash = (() => {
   winEl.addEventListener('pointerdown', e => { const b = e.target.closest('button[data-w]'); if (!b || b.dataset.w === state.w) return; state.w = b.dataset.w; placeThumb(true); draw(); });
   winEl.addEventListener('keydown', e => { const b = e.target.closest('button[data-w]'); if (b && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); state.w = b.dataset.w; placeThumb(true); draw(); } });
   window.addEventListener('resize', () => placeThumb(false));
+  const phone = matchMedia('(max-width: 40rem)');
+  phone.addEventListener('change', () => { if (state.lines) draw(); });
   document.getElementById('toggle-all').addEventListener('click', () => {
     state.open = state.open.size < BRANDS.length ? new Set(BRANDS.map(b => b.name)) : new Set();
     document.querySelectorAll('.mm-bd').forEach(sec => applyBrand(sec));
@@ -690,7 +729,7 @@ window.dash = (() => {
     if (!sec) return;
     const box = sec.querySelector('.mm-collapse');
     if (!box.firstChild) box.appendChild(sec._build());   // builds with the campaign already open
-    const tr = [...sec.querySelectorAll('tr.ch')].find(x => x.dataset.key === r.key);
+    const tr = [...sec.querySelectorAll('.ch[data-key]')].find(x => x.dataset.key === r.key);
     if (tr && tr.hidden && tr._open) tr._open();
     applyBrand(sec); updToggle();
     setTimeout(() => {
@@ -800,7 +839,7 @@ window.dash = (() => {
 
   function brandContent(rows, ins) {
     const wrap = el('div', 'mm-bd-content');
-    if (rows.length) wrap.appendChild(channelTable(rows, state.w));
+    if (rows.length) wrap.appendChild(phone.matches ? channelList(rows, state.w) : channelTable(rows, state.w));
     else wrap.appendChild(el('div', 'mm-empty t-body', 'No tracked lines for this brand.'));
     const cols = el('div', 'mm-cols');
     const defs = [['summary', 'Performance', 'c-sum', 'M4 19V9M10 19V5M16 19v-7M22 19H2'], ['improve', 'What to Improve', 'c-imp', 'M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6'], ['flag', 'Red Flags', 'c-flag', STATUS.flag[1]]];
@@ -861,6 +900,77 @@ window.dash = (() => {
     const fit = () => { if (tw.clientWidth) tw.style.setProperty('--tw', tw.clientWidth + 'px'); };
     if (window.ResizeObserver) new ResizeObserver(fit).observe(tw); requestAnimationFrame(fit);
     return tw;
+  }
+
+  // phone layout: same grouping as the table (active first, then launched / pending / paused / completed)
+  function channelList(rows, w) {
+    const wrap = el('div', 'mm-cl');
+    const groupsOf = list => { const gs = []; for (const r of list) { const g = gs.find(g => g.name === r.campaign); if (g) g.rows.push(r); else gs.push({ name: r.campaign, rows: [r] }); } return gs; };
+    const active = rows.filter(r => r.sheet_status === 'Active');
+    const rest = rows.filter(r => r.sheet_status !== 'Active').sort((a, c) => (ORDER[a.sheet_status] ?? 9) - (ORDER[c.sheet_status] ?? 9));
+    const addGroup = (g, isActive) => {
+      const id = groupId(g.rows[0].client, g.name, isActive);
+      const open = state.openCamps.has(id);
+      const worst = g.rows.map(r => r.status).sort((a, c) => (RANK[a] ?? 9) - (RANK[c] ?? 9))[0];
+      const gw = isActive ? w : 'flight';
+      const hasSpend = g.rows.some(r => r[gw + '_spend'] != null);
+      const spend = g.rows.reduce((a, r) => a + Number(r[gw + '_spend'] || 0), 0);
+      const box = el('section', 'mm-cgroup' + (open ? ' open' : ''));
+      const btn = el('button', 'mm-cgh'); btn.type = 'button'; btn.setAttribute('aria-expanded', String(open));
+      const nm = el('span', 'gname'); nm.appendChild(el('b', null, g.name));
+      const labels = [...new Set(g.rows.map(r => r.state_label).filter(Boolean))];
+      nm.appendChild(el('i', null, isActive ? g.rows.length + (g.rows.length === 1 ? ' channel' : ' channels') : (labels.length === 1 ? labels[0] : g.rows[0].sheet_status)));
+      const st = STATUS[worst] || STATUS.none; const cap = el('span', 'mm-cap s-' + worst); cap.append(icon(st[1]), document.createTextNode(st[0]));
+      const sp = el('span', 'gspend num', hasSpend ? usd(spend) : '—'); sp.appendChild(el('small', null, isActive ? WLABEL[w] : 'Whole flight'));
+      const side = el('span', 'gside'); side.append(sp, cap);
+      btn.append(icon(CHEV, 'chev'), nm, side);
+      const cards = el('div', 'mm-cards'); cards.hidden = !open;
+      const list = g.rows.map(r => channelCard(r, gw));
+      list.forEach(c => { c._open = () => { state.openCamps.delete(id); btn.click(); }; cards.appendChild(c); });
+      btn.addEventListener('click', () => {
+        const now = !state.openCamps.has(id);
+        if (now) state.openCamps.add(id); else state.openCamps.delete(id);
+        box.classList.toggle('open', now); btn.setAttribute('aria-expanded', String(now));
+        cards.hidden = !now; list.forEach(c => c.classList.toggle('enter', now));
+        const outer = wrap.closest('.mm-collapse'); if (outer && outer.style.height !== '0px') outer.style.height = 'auto';
+      });
+      box.append(btn, cards); wrap.appendChild(box);
+    };
+    groupsOf(active).forEach(g => addGroup(g, true));
+    if (rest.length) { wrap.appendChild(el('div', 'mm-csect', 'Launched, pending, paused and completed')); groupsOf(rest).forEach(g => addGroup(g, false)); }
+    return wrap;
+  }
+  function channelCard(r, w) {
+    const c = el('article', 'mm-cc ch'); c.dataset.key = r.key;
+    const hasAm = r.in_budget && r.budget_am != null, left = hasAm ? Number(r.budget_am) - Number(r.flight_spend || 0) : null;
+    const st = STATUS[r.status] || STATUS.none;
+    const top = el('div', 'mm-cc-top'); const ch = el('span', 'mm-ch'); ch.append(channelIcon(r.channel), document.createTextNode(r.channel));
+    const cap = el('span', 'mm-cap s-' + r.status); cap.append(icon(st[1]), document.createTextNode(st[0])); top.append(ch, cap);
+    const main = el('div', 'mm-cc-main');
+    const spend = el('div', 'mm-cc-spend'); spend.append(el('b', 'num', usd(r[w + '_spend'])), el('span', null, 'Spend · ' + WLABEL[w]));
+    main.appendChild(spend);
+    if (r.pacing != null && r.in_budget) {
+      const p = el('div', 'mm-pace'); const bar = el('div', 'mm-pbar ' + r.status); const fill = el('i'); fill.style.width = Math.min(100, Number(r.spent_pct || 0) * 100) + '%'; const tick = el('b'); tick.style.left = 'calc(' + Math.min(100, Number(r.time_pct || 0) * 100) + '% - 1px)'; bar.append(fill, tick);
+      const lab = el('span'); lab.append(document.createTextNode('Pacing '), el('b', 'num', pct0(r.pacing))); p.append(lab, bar); main.appendChild(p);
+    }
+    const kv = el('dl', 'mm-kv');
+    const item = (k, v, cls) => { const d = el('div'); d.append(el('dt', null, k), el('dd', cls || null, v)); kv.appendChild(d); };
+    if (hasAm) { item('Total Budget', usd(r.budget_am)); item('Remaining', usd(left), left < 0 ? 'neg' : null); }
+    item(r.result_label || 'Results', cnt(r[w + '_results']));
+    item('Cost / Result', usd2(r[w + '_cost_per_result']));
+    item('Impressions', cnt(r[w + '_impressions']));
+    item('Clicks', cnt(r[w + '_clicks']));
+    item('CTR', ctrf(r[w + '_ctr']));
+    item('CPM', usd2(r[w + '_cpm']));
+    if (r.frequency != null) item('Frequency', d3.format('.1f')(r.frequency));
+    c.append(top, main, kv);
+    const hasLink = r.report_link && /^https:\/\/datastudio\.google\.com\//.test(r.report_link);
+    if (r.note || hasLink) {
+      const n = el('div', 'mm-cc-note', r.note || '');
+      if (hasLink) { const a = el('a', null, (r.note ? ' · ' : '') + 'Open report ↗'); a.href = r.report_link; a.target = '_blank'; a.rel = 'noopener'; n.appendChild(a); }
+      c.appendChild(n);
+    }
+    return c;
   }
 
   function channelRow(r, w, open) {
