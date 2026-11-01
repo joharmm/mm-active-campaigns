@@ -160,7 +160,7 @@ window.dash = (() => {
   .mm .t-orange { color: var(--mm-orange); } .t-orange .mm-tile-top, .t-orange .mm-tile-v { color: var(--mm-orange); }
 
   /* Spring-driven disclosure: JS animates height from the live on-screen value */
-  .mm-collapse { overflow: hidden; height: 0; }
+  .mm-collapse { overflow: hidden; overflow: clip; height: 0; }
 
   /* Sheet anchored to its tile: materializes (scale + blur) instead of a plain fade */
   .mm-sheet { background: var(--mm-card); border-radius: var(--mm-radius); box-shadow: var(--mm-shadow-lg); overflow: hidden; }
@@ -189,7 +189,7 @@ window.dash = (() => {
   .mm-link { border: 0; background: transparent; color: var(--mm-blue); cursor: pointer; min-height: 2.75rem; padding: 0 .25rem; font-size: .9375rem; }
   .mm-link:active { opacity: .5; }
   .mm-brands { display: flex; flex-direction: column; gap: .75rem; }
-  .mm-bd { background: var(--mm-card); border-radius: var(--mm-radius); box-shadow: var(--mm-shadow); overflow: hidden; scroll-margin-top: 4rem; }
+  .mm-bd { background: var(--mm-card); border-radius: var(--mm-radius); box-shadow: var(--mm-shadow); overflow: hidden; overflow: clip; scroll-margin-top: 4rem; }
   .mm-bd-h { display: flex; align-items: center; gap: .875rem; width: 100%; padding: .875rem 1rem; border: 0; background: transparent; cursor: pointer; text-align: left; }
   .mm-bd-h:active { background: var(--mm-fill); }
   @media (hover: hover) { .mm-bd-h:hover { background: var(--mm-fill-2); } }
@@ -299,6 +299,65 @@ window.dash = (() => {
   .mm-csect { margin: .5rem .25rem 0; font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--mm-label-2); }
   @media (max-width: 22.5rem) { .mm-kv { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .mm-t .neg { color: var(--mm-red); }
+
+  /* Frozen header: a copy of the header row stays under the toolbar while the page scrolls and follows the table sideways */
+  .mm-tbl { margin-top: .875rem; }
+  .mm-thf { position: sticky; top: var(--bar-h, 3.25rem); z-index: 3; overflow: hidden; background: var(--mm-card); border-radius: var(--mm-radius-sm) var(--mm-radius-sm) 0 0; box-shadow: 0 0 0 .5px var(--mm-sep), 0 .25rem .5rem -.25rem rgba(0, 0, 0, .12); }
+  .mm-thf table { table-layout: fixed; width: auto; }
+  .mm-thf th { position: static; box-sizing: border-box; }
+  .mm-thf th:first-child { position: sticky; left: 0; z-index: 1; }
+  .mm-tbl .mm-tw { margin-top: calc(-1 * var(--thh, 0px)); }
+  .mm-tbl .mm-tw > table > thead th { visibility: hidden; }
+
+  /* Creatives under a channel */
+  .mm-crbtn { display: inline-flex; align-items: center; gap: .3125rem; margin-top: .375rem; padding: .1875rem .5rem .1875rem .375rem; min-height: 1.625rem; border: 0; border-radius: 999px; background: var(--mm-fill); color: var(--mm-label-2); font-size: .75rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .mm-t .mm-crbtn { display: flex; width: max-content; }
+  .mm-crbtn:active { opacity: .6; }
+  .mm-crbtn .chev { font-size: .75rem; }
+  .mm-crbtn[aria-expanded="true"] .chev { transform: rotate(90deg); }
+  .mm-t tr.cr td { background: var(--mm-fill-2); }
+  .mm-t tr.cr td:first-child { position: sticky; left: 0; z-index: 1; background: var(--mm-card); box-shadow: inset 2.75rem 0 0 var(--mm-fill-2); padding-left: 3.25rem; min-width: 14rem; max-width: 20rem; }
+  .mm-t tr.cr.enter td { animation: mmRowIn .28s cubic-bezier(.2, .8, .2, 1) both; }
+  .mm-crname { display: inline-flex; align-items: flex-start; gap: .375rem; color: var(--mm-blue); text-decoration: none; font-weight: 500; line-height: 1.3; white-space: normal; }
+  .mm-crname .ic { font-size: .9375rem; margin-top: .0625rem; }
+  span.mm-crname { color: var(--mm-label); }
+  .mm-crlist { display: flex; flex-direction: column; gap: .5rem; }
+  .mm-crc { background: var(--mm-card); border-radius: .625rem; padding: .625rem; display: flex; flex-direction: column; gap: .5rem; box-shadow: 0 0 0 .5px var(--mm-sep); }
+  .mm-crc.enter { animation: mmRowIn .28s cubic-bezier(.2, .8, .2, 1) both; }
+  .mm-crc-go { display: inline-flex; align-self: flex-start; align-items: center; min-height: 2.25rem; padding: 0 .75rem; border-radius: .5rem; background: var(--mm-blue-tint); color: var(--mm-blue); font-size: .8125rem; font-weight: 600; text-decoration: none; }
+
+  /* Spend by Channel */
+  .mm-chtot { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; padding: .75rem 1rem; }
+  .mm-nh { display: flex; align-items: center; gap: .75rem; width: 100%; padding: .75rem 1rem; border: 0; background: transparent; cursor: pointer; text-align: left; }
+  .mm-nh:active { background: var(--mm-fill); }
+  @media (hover: hover) { .mm-nh:hover { background: var(--mm-fill-2); } }
+  .mm-nh > .chev { color: var(--mm-label-3); font-size: .9375rem; flex: none; }
+  [aria-expanded="true"] > .mm-nh > .chev { transform: rotate(90deg); }
+  .mm-nh > svg:not(.ic) { width: 2.25rem; height: 2.25rem; border-radius: .6rem; flex: none; }
+  .mm-nh .mm-logo { width: 2.25rem; height: 2.25rem; border-radius: .6rem; }
+  .mm-nh .mm-logo .mono { font-size: .6875rem; }
+  .mm-nname { display: flex; flex-direction: column; gap: .25rem; min-width: 0; flex: 1 1 auto; }
+  .mm-nname strong { font-size: 1rem; font-weight: 600; letter-spacing: -.01em; }
+  .mm-nname small { font-size: .75rem; color: var(--mm-label-2); }
+  .mm-nmob { display: none; font-size: .8125rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .mm-nbar { height: 4px; border-radius: 2px; background: var(--mm-fill); max-width: 16rem; overflow: hidden; }
+  .mm-nbar i { display: block; height: 100%; border-radius: 2px; background: var(--mm-blue); }
+  .mm-nstats { display: grid; grid-template-columns: repeat(4, 5.25rem); gap: .5rem; flex: none; }
+  .mm-nstats div { display: flex; flex-direction: column; align-items: flex-end; gap: .0625rem; }
+  .mm-nstats b { font-size: .9375rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .mm-nstats b.neg { color: var(--mm-red); }
+  .mm-nstats i { font-style: normal; color: var(--mm-label-2); font-size: .6875rem; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+  .mm-n2 { border-top: .5px solid var(--mm-sep); }
+  .mm-n2 > .mm-nh { padding-left: 1.5rem; }
+  .mm-n3 { border-top: .5px solid var(--mm-sep); background: var(--mm-fill-2); }
+  .mm-n3 .mm-nh { padding-left: 2.25rem; }
+  @media (max-width: 40rem) {
+    .mm-nstats { display: none; }
+    .mm-nmob { display: block; }
+    .mm-nh { padding: .75rem .875rem; }
+    .mm-n2 > .mm-nh { padding-left: 1.125rem; }
+    .mm-n3 .mm-nh { padding-left: 1.5rem; }
+  }
   .mm-t tr.ch.hl td { animation: mmHl 2.6s ease-out; }
   @keyframes mmHl { 0%, 45% { background: var(--mm-blue-tint); } 100% { background: var(--mm-card); } }
 
@@ -362,7 +421,7 @@ window.dash = (() => {
       <div class="mm-titles">
         <span class="mm-eyebrow t-cap">Media Market · Digital Team</span>
         <h1 class="mm-title t-large" id="large-title">Active Campaigns</h1>
-        <span class="mm-updated t-foot"><span class="live"></span><span id="updated">Updated Oct 26, 2026, 14:18 Kuwait time · refreshes Sun–Thu at 9:00</span></span>
+        <span class="mm-updated t-foot"><span class="live"></span><span id="updated">Updated Nov 1, 2026, 10:26 Kuwait time · refreshes Sun–Thu at 9:00</span></span>
       </div>
     </header>
 
@@ -402,6 +461,9 @@ window.dash = (() => {
       <div class="mm-collapse"><div class="body"><div class="mm-tw" style="margin-top:0"><table class="mm-t" id="missingtable"><thead><tr><th>Brand</th><th>Channel</th><th>Campaign</th><th class="r">Budget AM</th><th>Why</th></tr></thead><tbody></tbody></table></div></div></div>
     </section>
 
+    <div class="mm-sh"><h2 class="t-title">Spend by Channel</h2><span class="t-foot" id="ch-sub" style="color:var(--mm-label-2)"></span></div>
+    <section class="mm-brands" id="channels"></section>
+
     <section class="mm-disc" id="method" aria-expanded="false">
       <button type="button"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.1"/></svg>How to read this<svg class="ic chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
       <div class="mm-collapse"><div class="body">
@@ -414,6 +476,8 @@ window.dash = (() => {
           <li><b>Supplier lines</b> cost clicks × the agreed rate (Iconpeak display and sports $0.40, Landmark $0.40, Premium $0.70) and Shasha views × $0.025. McDonald's clicks come from Bitly; Toyota, Lexus and Al Sayer Corporate clicks are GA4 sessions, which run well below supplier-reported clicks.</li>
           <li><b>Red flag</b> means pacing below 80% once a line has run for 3 full days (before that it shows as To Watch, ramping up). Everything else that needs a look is <b>To Watch</b>: cost per lead above $25 (Toyota) or $50 (Lexus), spend over Budget AM, no spend today, frequency of 8+, paused search, lines due but not live.</li>
           <li><b>Total Budget</b> is the line's Budget AM from the tracker; <b>Remaining</b> is Total Budget minus spend so far in the campaign (red when overspent). Active and launched lines only.</li>
+          <li><b>Creatives</b>: tap "N creatives" under a channel to see its active ads and their numbers. Meta and X names open a preview of the ad. TikTok and Snapchat don't share preview links with the dashboard, so theirs open Ads Manager (login needed).</li>
+          <li><b>Spend by Channel</b> covers active and launched campaigns, including search lines that have no Budget AM. Tap a channel, then a brand, then a campaign to jump to its row.</li>
           <li><b>Refresh</b> (top right) pulls new numbers from every platform (about 10–15 minutes; the page updates by itself) and otherwise reloads the latest data. Numbers are also pulled automatically Sun–Thu at 9:00.</li>
           <li>Brands come from campaign names, so Al Sayer Corporate's anti-counterfeit campaigns appear under Al Sayer Corporate although they run in the Toyota ad accounts. Twitch isn't connected: check its dashboard directly.</li>
           <li>The data is encrypted. It is only decrypted on your device after the team password is entered.</li>
@@ -436,7 +500,7 @@ window.dash = (() => {
   const STATUS = { flag: ['Red flag', 'M10.3 4.3 2.8 17.5A2 2 0 0 0 4.5 20.5h15a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0zM12 9.5v4.5M12 17.2v.1'], watch: ['Watch', 'M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6'], ok: ['On plan', 'M5 12.5l4.5 4.5L19 7.5'], none: ['Not tracked', 'M8 12h8'], pending: ['Pending', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7.5V12l3 2'], paused: ['Paused', 'M9 6.5v11M15 6.5v11'], done: ['Completed', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8.5 12.2l2.4 2.4 4.6-4.8'] };
   const RANK = { flag: 0, watch: 1, ok: 2, pending: 3, paused: 4, done: 5, none: 6 };
   const ORDER = { Launched: 0, Pending: 1, Paused: 2, Completed: 3 };
-  const state = { w: 'today', open: new Set(), openCamps: new Set(), sheet: null, pass: null, keys: {}, lines: null, insights: null, sig: '' };
+  const state = { w: 'today', open: new Set(), openCamps: new Set(), openCr: new Set(), openCh: new Set(), sheet: null, pass: null, keys: {}, lines: null, insights: null, sig: '' };
   const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ---------- formatting & DOM helpers
@@ -675,6 +739,8 @@ window.dash = (() => {
 
   // large title → compact title in the toolbar once it scrolls under (iOS large-title behaviour)
   const bar = document.getElementById('bar');
+  const setBarH = () => { if (bar.offsetHeight) bar.parentElement.style.setProperty('--bar-h', bar.offsetHeight + 'px'); };
+  window.addEventListener('resize', setBarH);
   if (window.IntersectionObserver) new IntersectionObserver(([e]) => { bar.style.setProperty('--edge', e.isIntersecting ? 0 : 1); }, { root: document, threshold: 0 }).observe(document.getElementById('large-title'));
 
   // collapsible cards at the bottom
@@ -788,6 +854,8 @@ window.dash = (() => {
       tr.append(el('td', 'nw', r.client), chCell(r.channel), el('td', null, r.campaign), el('td', 'r', usd(r.budget_am)), el('td', 'note', r.note));
       mtb.appendChild(tr);
     }
+    renderChannels(L, w);
+    setBarH();
     if (state.sheet) fillSheet();
     document.querySelectorAll('.mm-disc[aria-expanded="true"] .mm-collapse').forEach(b => { b.style.height = 'auto'; });
     if (state.sheet) sheetWrap.style.height = 'auto';
@@ -881,12 +949,12 @@ window.dash = (() => {
       btn.append(icon(CHEV, 'chev'), nm, icons, cap, sp);
       td.appendChild(btn); tr.appendChild(td); tb.appendChild(tr);
       const chRows = g.rows.map(r => channelRow(r, gw, open));
-      chRows.forEach(x => { x._open = () => { state.openCamps.delete(id); btn.click(); }; tb.appendChild(x); });
+      chRows.forEach(x => { x._open = () => { state.openCamps.delete(id); btn.click(); }; tb.appendChild(x); (x._crs || []).forEach(c => tb.appendChild(c)); });
       btn.addEventListener('click', () => {
         const now = !state.openCamps.has(id);
         if (now) state.openCamps.add(id); else state.openCamps.delete(id);
         tr.classList.toggle('open', now); btn.setAttribute('aria-expanded', String(now));
-        chRows.forEach(x => { x.classList.toggle('enter', now); x.hidden = !now; });
+        chRows.forEach(x => { x.classList.toggle('enter', now); x.hidden = !now; (x._crs || []).forEach(c => { c.hidden = !now || !state.openCr.has(x.dataset.key); }); });
         const box = tw.closest('.mm-collapse'); if (box && box.style.height !== '0px') box.style.height = 'auto';
       });
     };
@@ -896,10 +964,22 @@ window.dash = (() => {
       groupsOf(rest).forEach(g => addGroup(g, false));
     }
     tbl.appendChild(tb); tw.appendChild(tbl);
+    const wrap = el('div', 'mm-tbl'), thf = el('div', 'mm-thf'), copy = el('table', 'mm-t');
+    copy.setAttribute('aria-hidden', 'true'); copy.appendChild(th.cloneNode(true)); thf.appendChild(copy); wrap.append(thf, tw);
+    const syncHead = () => {
+      if (!tw.clientWidth) return;
+      const real = [...th.rows[0].cells], cc = [...copy.tHead.rows[0].cells];
+      copy.style.width = tbl.offsetWidth + 'px';
+      real.forEach((c, i) => { cc[i].style.width = c.getBoundingClientRect().width + 'px'; });
+      wrap.style.setProperty('--thh', th.offsetHeight + 'px');
+      thf.scrollLeft = tw.scrollLeft;
+    };
+    tw.addEventListener('scroll', () => { thf.scrollLeft = tw.scrollLeft; }, { passive: true });
     // campaign rows span the whole table but stay as wide as the visible area, so their summary never scrolls off screen
     const fit = () => { if (tw.clientWidth) tw.style.setProperty('--tw', tw.clientWidth + 'px'); };
-    if (window.ResizeObserver) new ResizeObserver(fit).observe(tw); requestAnimationFrame(fit);
-    return tw;
+    if (window.ResizeObserver) { const ro = new ResizeObserver(() => { fit(); syncHead(); }); ro.observe(tw); ro.observe(tbl); [...th.rows[0].cells].forEach(c => ro.observe(c)); }
+    requestAnimationFrame(() => { fit(); syncHead(); });
+    return wrap;
   }
 
   // phone layout: same grouping as the table (active first, then launched / pending / paused / completed)
@@ -964,13 +1044,144 @@ window.dash = (() => {
     item('CPM', usd2(r[w + '_cpm']));
     if (r.frequency != null) item('Frequency', d3.format('.1f')(r.frequency));
     c.append(top, main, kv);
+    const crs = creativesOf(r);
     const hasLink = r.report_link && /^https:\/\/datastudio\.google\.com\//.test(r.report_link);
     if (r.note || hasLink) {
       const n = el('div', 'mm-cc-note', r.note || '');
       if (hasLink) { const a = el('a', null, (r.note ? ' · ' : '') + 'Open report ↗'); a.href = r.report_link; a.target = '_blank'; a.rel = 'noopener'; n.appendChild(a); }
       c.appendChild(n);
     }
+    if (crs.length) {
+      const list = el('div', 'mm-crlist'); list.hidden = !state.openCr.has(r.key);
+      const cards = crs.map(x => creativeCard(x, r, w)); cards.forEach(x => list.appendChild(x));
+      const b = crToggle(r, on => { list.hidden = !on; cards.forEach(x => x.classList.toggle('enter', on)); });
+      b.style.alignSelf = 'flex-start'; b.style.marginTop = '0';
+      c.append(b, list);
+    }
     return c;
+  }
+
+  // ---------- creatives: active ads under a channel; r.creatives = [{id, name, today|last7|flight: {spend, impressions, clicks, results}, preview_url, preview_kind, preview_expires}]
+  const CR_HOSTS = /^https:\/\/([a-z0-9-]+\.)*(facebook\.com|twimg\.com|tiktok\.com|snapchat\.com)\//;
+  const creativesOf = r => [...(r.creatives || [])].sort((a, b) => Number((b.flight || {}).spend || 0) - Number((a.flight || {}).spend || 0));
+  const crShort = n => { const t = String(n || 'Untitled ad'), i = t.lastIndexOf('_Ad '); return i > 0 ? t.slice(i + 1) : t; };
+  function crLink(c) {
+    if (!c.preview_url || !CR_HOSTS.test(c.preview_url)) return null;
+    if (c.preview_expires && Date.now() / 1000 > Number(c.preview_expires)) return null;
+    return { href: c.preview_url, label: c.preview_kind === 'manager' ? 'Ads Manager ↗' : 'Preview ↗' };
+  }
+  function crName(c) {
+    const l = crLink(c), n = l ? el('a', 'mm-crname') : el('span', 'mm-crname');
+    if (l) { n.href = l.href; n.target = '_blank'; n.rel = 'noopener'; n.title = l.label; }
+    n.append(icon('M4 5.5h16v13H4zM4 15l4.5-4 3.5 3 3-2.5 5 4'), document.createTextNode(crShort(c.name)));
+    return n;
+  }
+  function crNums(c, w) {
+    const m = c[w] || {}, sp = m.spend, im = m.impressions, ck = m.clicks, rs = m.results;
+    return { sp, im, ck, rs, ctr: im ? ck / im : null, cpm: im ? sp / im * 1000 : null, cpr: rs ? sp / rs : null };
+  }
+  function crToggle(r, apply) {
+    const n = (r.creatives || []).length, on = state.openCr.has(r.key);
+    const b = el('button', 'mm-crbtn'); b.type = 'button'; b.setAttribute('aria-expanded', String(on));
+    b.append(icon(CHEV, 'chev'), document.createTextNode(n + (n === 1 ? ' creative' : ' creatives')));
+    b.addEventListener('click', () => {
+      const now = !state.openCr.has(r.key);
+      if (now) state.openCr.add(r.key); else state.openCr.delete(r.key);
+      b.setAttribute('aria-expanded', String(now)); apply(now);
+      const box = b.closest('.mm-collapse'); if (box && box.style.height !== '0px') box.style.height = 'auto';
+    });
+    return b;
+  }
+  function creativeRow(c, r, w, visible) {
+    const tr = el('tr', 'cr'); tr.hidden = !visible;
+    const n = crNums(c, w), l = crLink(c);
+    const first = el('td'); first.appendChild(crName(c));
+    const st = el('td'); const cap = el('span', 'mm-cap s-ok'); cap.append(icon(STATUS.ok[1]), document.createTextNode('Active')); st.appendChild(cap);
+    const rep = el('td', 'nw');
+    if (l) { const a = el('a', null, l.label); a.href = l.href; a.target = '_blank'; a.rel = 'noopener'; rep.appendChild(a); } else rep.append(el('span', 'mut', '—'));
+    tr.append(first, st, el('td', 'r', usd(n.sp)), el('td', 'r mut', '—'), el('td', 'r mut', '—'), el('td', 'r', cnt(n.im)), el('td', 'r', cnt(n.ck)),
+      el('td', 'r', ctrf(n.ctr)), el('td', 'r', usd2(n.cpm)), el('td', 'r', cnt(n.rs)), el('td', 'nw mut', r.result_label || '—'), el('td', 'r', usd2(n.cpr)),
+      el('td', 'mut', '—'), el('td', 'r mut', '—'), el('td', 'note', ''), rep);
+    return tr;
+  }
+  function creativeCard(c, r, w) {
+    const box = el('div', 'mm-crc'), n = crNums(c, w), l = crLink(c);
+    const kv = el('dl', 'mm-kv');
+    const item = (k, v) => { const d = el('div'); d.append(el('dt', null, k), el('dd', null, v)); kv.appendChild(d); };
+    item('Spend', usd(n.sp)); item(r.result_label || 'Results', cnt(n.rs)); item('Cost / Result', usd2(n.cpr));
+    item('Impressions', cnt(n.im)); item('Clicks', cnt(n.ck)); item('CTR', ctrf(n.ctr));
+    box.append(crName(c), kv);
+    if (l) { const a = el('a', 'mm-crc-go', l.label); a.href = l.href; a.target = '_blank'; a.rel = 'noopener'; box.appendChild(a); }
+    return box;
+  }
+
+  // ---------- Spend by Channel: Channel → Brand → Campaign
+  function chGroup(ch) {
+    for (const [re, name] of [[/^Instagram/, 'Instagram'], [/^Facebook/, 'Facebook'], [/^Snapchat/, 'Snapchat'], [/^TikTok/, 'TikTok'], [/^YouTube/, 'YouTube'], [/^SEM/, 'SEM'], [/^Twitch/, 'Twitch'], [/Shasha/, 'Shasha'], [/Landmark/, 'Landmark'], [/Programmatic/, 'Programmatic']]) if (re.test(ch)) return name;
+    return ch;
+  }
+  function nestRow(cls, key, headKids, build) {
+    const sec = el('div', cls), on = state.openCh.has(key);
+    sec.setAttribute('aria-expanded', String(on));
+    const btn = el('button', 'mm-nh'); btn.type = 'button'; btn.append(...headKids, icon(CHEV, 'chev'));
+    const box = el('div', 'mm-collapse');
+    if (on) { box.appendChild(build()); box.style.height = 'auto'; }
+    btn.addEventListener('click', () => {
+      const now = !state.openCh.has(key);
+      if (now) state.openCh.add(key); else state.openCh.delete(key);
+      if (now && !box.firstChild) box.appendChild(build());
+      sec.setAttribute('aria-expanded', String(now)); setOpen(box, now);
+    });
+    sec.append(btn, box);
+    return sec;
+  }
+  function renderChannels(L, w) {
+    document.getElementById('ch-sub').textContent = 'Active and launched · ' + WLABEL[w];
+    const host = document.getElementById('channels'); host.replaceChildren();
+    const rows = L.filter(r => r.sheet_status === 'Active' || r.sheet_status === 'Launched');
+    const add = (o, r) => { o.spend += Number(r[w + '_spend'] || 0); o.am += r.budget_am != null ? Number(r.budget_am) : 0; o.flight += r.budget_am != null ? Number(r.flight_spend || 0) : 0; o.rows.push(r); };
+    const blank = name => ({ name, spend: 0, am: 0, flight: 0, rows: [] });
+    const groupBy = (list, keyOf) => { const m = new Map(); for (const r of list) { const k = keyOf(r); if (!m.has(k)) m.set(k, blank(k)); add(m.get(k), r); } return [...m.values()].sort((a, b) => b.spend - a.spend || b.am - a.am); };
+    const total = rows.reduce((a, r) => a + Number(r[w + '_spend'] || 0), 0);
+    const pctOf = (v, of) => of ? d3.format('.0%')(v / of) : '—';
+    const stats = (o, of) => {
+      const box = el('div', 'mm-nstats'), left = o.am ? o.am - o.flight : null;
+      const one = (val, lab, cls) => { const d = el('div'); d.append(el('b', cls || null, val), el('i', null, lab)); box.appendChild(d); };
+      one(usd(o.spend), 'Spend'); one(pctOf(o.spend, of), 'Share'); one(o.am ? usd(o.am) : '—', 'Budget AM'); one(left != null ? usd(left) : '—', 'Remaining', left != null && left < 0 ? 'neg' : null);
+      return box;
+    };
+    const nameBox = (title, sub, o, of, bar) => {
+      const n = el('span', 'mm-nname'); n.appendChild(el('strong', null, title));
+      if (sub) n.appendChild(el('small', null, sub));
+      n.appendChild(el('span', 'mm-nmob', usd(o.spend) + ' · ' + pctOf(o.spend, of) + (o.am ? ' · AM ' + usd(o.am) : '')));
+      if (bar) { const b = el('span', 'mm-nbar'); b.style.display = 'block'; const i = el('i'); i.style.width = (of ? Math.min(100, o.spend / of * 100) : 0) + '%'; b.appendChild(i); n.appendChild(b); }
+      return n;
+    };
+    const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
+    const totalBox = el('div', 'mm-group mm-chtot'); totalBox.append(el('span', 't-head', 'All channels'), el('span', 't-head num', usd(total)));
+    host.appendChild(totalBox);
+    for (const ch of groupBy(rows, r => chGroup(r.channel))) {
+      const brands = groupBy(ch.rows, r => r.client);
+      const camps = new Set(ch.rows.map(r => r.client + '|' + r.campaign)).size;
+      const sec = nestRow('mm-bd', 'c:' + ch.name, [channelIcon(ch.name), nameBox(ch.name, plural(brands.length, 'brand') + ' · ' + plural(camps, 'campaign'), ch, total, true), stats(ch, total)], () => {
+        const list = el('div');
+        for (const b of brands) {
+          const cs = groupBy(b.rows, r => r.campaign);
+          list.appendChild(nestRow('mm-n2', 'b:' + ch.name + '|' + b.name, [logoTile(brandOf(b.name)), nameBox(b.name, plural(cs.length, 'campaign'), b, ch.spend), stats(b, ch.spend)], () => {
+            const inner = el('div');
+            for (const c of cs) {
+              const row = el('div', 'mm-n3'), btn = el('button', 'mm-nh'); btn.type = 'button';
+              btn.append(nameBox(c.name, null, c, b.spend), stats(c, b.spend), icon(CHEV, 'chev'));
+              btn.addEventListener('click', () => openLine(c.rows[0]));
+              row.appendChild(btn); inner.appendChild(row);
+            }
+            return inner;
+          }));
+        }
+        return list;
+      });
+      host.appendChild(sec);
+    }
   }
 
   function channelRow(r, w, open) {
@@ -983,7 +1194,10 @@ window.dash = (() => {
     else pace.append(el('span', 'mut', '—'));
     const rep = el('td', 'nw');
     if (r.report_link && /^https:\/\/datastudio\.google\.com\//.test(r.report_link)) { const a = el('a', null, 'Open ↗'); a.href = r.report_link; a.target = '_blank'; a.rel = 'noopener'; rep.appendChild(a); } else rep.append(el('span', 'mut', '—'));
-    tr.append(chCell(r.channel), stc,
+    const chTd = chCell(r.channel);
+    tr._crs = creativesOf(r).map(c => creativeRow(c, r, w, open && state.openCr.has(r.key)));
+    if (tr._crs.length) chTd.appendChild(crToggle(r, on => tr._crs.forEach(c => { c.hidden = !on; c.classList.toggle('enter', on); })));
+    tr.append(chTd, stc,
       el('td', 'r', usd(r[w + '_spend'])), el('td', 'r', hasAm ? usd(r.budget_am) : '—'), el('td', left != null && left < 0 ? 'r neg' : 'r', hasAm ? usd(left) : '—'), el('td', 'r', cnt(r[w + '_impressions'])), el('td', 'r', cnt(r[w + '_clicks'])),
       el('td', 'r', ctrf(r[w + '_ctr'])), el('td', 'r', usd2(r[w + '_cpm'])), el('td', 'r', cnt(r[w + '_results'])),
       el('td', 'nw mut', r.result_label || '—'), el('td', 'r', usd2(r[w + '_cost_per_result'])), pace,
