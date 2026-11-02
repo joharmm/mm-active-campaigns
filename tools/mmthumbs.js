@@ -1,7 +1,7 @@
 // Creative thumbnails for the dashboard, used by the refresh routine. Needs MM_PASS in the environment.
 // Meta ads show their own thumbnail. Snapchat, TikTok and X ads borrow the thumbnail of the same creative on Meta, matched by ad name within the same client + campaign.
 // meta-ads.json = [{id, name, creative_id, client, campaign}], every Meta ad of the campaigns behind Active/Launched lines, any status.
-//   node tools/mmthumbs.js need meta-ads.json                  prints the creative ids with no stored thumbnail
+//   node tools/mmthumbs.js need meta-ads.json lines.json       prints the creative ids that will be shown but have no stored thumbnail
 //   node tools/mmthumbs.js apply lines.json meta-ads.json urls.json   urls.json = {creative_id: thumbnail_url}; stores new ones, sets `thumb` on every creative
 const crypto = require('crypto'), fs = require('fs'), https = require('https'), path = require('path');
 const CACHE = path.join(__dirname, '..', 'data', 'thumbs.enc.json'), ITER = 600000;
@@ -76,8 +76,18 @@ function assign(lines, ads, cache) {
   const [mode, a, b, c] = process.argv.slice(2);
   if (!process.env.MM_PASS) throw new Error('MM_PASS is not set');
   if (mode === 'need') {
-    const cache = readCache(), ads = JSON.parse(fs.readFileSync(a, 'utf8'));
-    console.log(JSON.stringify([...new Set(ads.map(x => String(x.creative_id)))].filter(id => !cache[id])));
+    // Only creatives that will be shown: active Meta ads, and paused ones that are the best name match for a Snapchat/TikTok/X ad.
+    const cache = readCache(), ads = JSON.parse(fs.readFileSync(a, 'utf8')), lines = b ? JSON.parse(fs.readFileSync(b, 'utf8')) : null;
+    if (!lines) { console.log(JSON.stringify([...new Set(ads.map(x => String(x.creative_id)))].filter(id => !cache[id]))); return; }
+    const byId = {}, pool = {}, want = new Set();
+    for (const x of ads) { byId[x.id] = x; (pool[x.client + '|' + x.campaign] = pool[x.client + '|' + x.campaign] || []).push({ x, p: parse(x.name) }); }
+    for (const r of lines) for (const c of r.creatives || []) {
+      if (byId[c.id]) { want.add(String(byId[c.id].creative_id)); continue; }
+      const p = parse(c.name); let best = 0, top = [];
+      for (const o of pool[r.client + '|' + r.campaign] || []) { const s = score(p, o.p); if (s > best) { best = s; top = [o]; } else if (s && s === best) top.push(o); }
+      for (const o of top) want.add(String(o.x.creative_id));
+    }
+    console.log(JSON.stringify([...want].filter(id => !cache[id])));
   } else if (mode === 'apply') {
     const lines = JSON.parse(fs.readFileSync(a, 'utf8')), ads = JSON.parse(fs.readFileSync(b, 'utf8')), urls = c && fs.existsSync(c) ? JSON.parse(fs.readFileSync(c, 'utf8')) : {};
     const cache = readCache(), linked = { ...cache }; let added = 0, failed = 0;
