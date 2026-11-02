@@ -80,10 +80,11 @@ function assign(lines, ads, cache) {
     console.log(JSON.stringify([...new Set(ads.map(x => String(x.creative_id)))].filter(id => !cache[id])));
   } else if (mode === 'apply') {
     const lines = JSON.parse(fs.readFileSync(a, 'utf8')), ads = JSON.parse(fs.readFileSync(b, 'utf8')), urls = c && fs.existsSync(c) ? JSON.parse(fs.readFileSync(c, 'utf8')) : {};
-    const cache = readCache(); let added = 0, failed = 0;
-    for (const [id, u] of Object.entries(urls)) { if (cache[id]) continue; const d = await download(u); if (d) { cache[id] = d; added++; } else failed++; }
+    const cache = readCache(), linked = { ...cache }; let added = 0, failed = 0;
+    // If the image server can't be reached from here, link the Meta URL itself for this run (it expires in a few days; the next run renews it).
+    for (const [id, u] of Object.entries(urls)) { if (cache[id]) continue; const d = await download(u); if (d) { cache[id] = linked[id] = d; added++; } else { failed++; if (/^https:\/\/[a-z0-9.-]+\.fbcdn\.net\//.test(u)) linked[id] = u; } }
     if (added) writeCache(cache);
-    const s = assign(lines, ads, cache);
+    const s = assign(lines, ads, linked);
     fs.writeFileSync(a, JSON.stringify(lines));
     console.log(JSON.stringify({ downloaded: added, download_failed: failed, own: s.own, borrowed: s.borrowed, no_thumb: s.none.length }));
     for (const n of s.none) console.log('no thumb: ' + n);

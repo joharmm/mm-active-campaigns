@@ -423,7 +423,7 @@ window.dash = (() => {
       <div class="mm-titles">
         <span class="mm-eyebrow t-cap">Media Market · Digital Team</span>
         <h1 class="mm-title t-large" id="large-title">Active Campaigns</h1>
-        <span class="mm-updated t-foot"><span class="live"></span><span id="updated">Updated Nov 2, 2026, 09:12 Kuwait time · refreshes Sun–Thu at 9:00</span></span>
+        <span class="mm-updated t-foot"><span class="live"></span><span id="updated">Updated Nov 2, 2026, 10:35 Kuwait time · refreshes Sun–Thu at 9:00</span></span>
       </div>
     </header>
 
@@ -1065,7 +1065,7 @@ window.dash = (() => {
 
   // ---------- creatives: active ads under a channel; r.creatives = [{id, name, today|last7|flight: {spend, impressions, clicks, results}, preview_url, preview_kind, preview_expires}]
   const CR_HOSTS = /^https:\/\/([a-z0-9-]+\.)*(facebook\.com|twimg\.com|tiktok\.com|snapchat\.com)\//;
-  const CR_THUMB = /^data:image\/(jpeg|png|webp);base64,/, CR_ICON = 'M4 5.5h16v13H4zM4 15l4.5-4 3.5 3 3-2.5 5 4';
+  const CR_THUMB = /^(data:image\/(jpeg|png|webp);base64,|https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*\.fbcdn\.net\/)/,CR_ICON = 'M4 5.5h16v13H4zM4 15l4.5-4 3.5 3 3-2.5 5 4';
   const creativesOf = r => [...(r.creatives || [])].sort((a, b) => Number((b.flight || {}).spend || 0) - Number((a.flight || {}).spend || 0));
   const crShort = n => { const t = String(n || 'Untitled ad'), i = t.lastIndexOf('_Ad '); return i > 0 ? t.slice(i + 1) : t; };
   function crLink(c) {
@@ -1082,7 +1082,7 @@ window.dash = (() => {
   function crThumb(c) {
     const box = el('span', 'mm-crthumb');
     if (c.thumb && CR_THUMB.test(c.thumb)) {
-      const i = el('img'); i.src = c.thumb; i.alt = ''; i.loading = 'lazy'; i.decoding = 'async';
+      const i = el('img'); i.src = c.thumb; i.alt = ''; i.loading = 'lazy'; i.decoding = 'async'; i.referrerPolicy = 'no-referrer';
       if (c.thumb_from) box.title = 'Thumbnail from Meta: ' + c.thumb_from;
       i.addEventListener('error', () => i.replaceWith(icon(CR_ICON)));
       box.appendChild(i);
