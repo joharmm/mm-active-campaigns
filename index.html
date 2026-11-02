@@ -316,10 +316,12 @@ window.dash = (() => {
   .mm-crbtn .chev { font-size: .75rem; }
   .mm-crbtn[aria-expanded="true"] .chev { transform: rotate(90deg); }
   .mm-t tr.cr td { background: var(--mm-fill-2); }
-  .mm-t tr.cr td:first-child { position: sticky; left: 0; z-index: 1; background: var(--mm-card); box-shadow: inset 2.75rem 0 0 var(--mm-fill-2); padding-left: 3.25rem; min-width: 14rem; max-width: 20rem; }
+  .mm-t tr.cr td:first-child { position: sticky; left: 0; z-index: 1; background: var(--mm-card); box-shadow: inset 2.75rem 0 0 var(--mm-fill-2); padding-left: 3.25rem; min-width: 17rem; max-width: 22rem; }
   .mm-t tr.cr.enter td { animation: mmRowIn .28s cubic-bezier(.2, .8, .2, 1) both; }
-  .mm-crname { display: inline-flex; align-items: flex-start; gap: .375rem; color: var(--mm-blue); text-decoration: none; font-weight: 500; line-height: 1.3; white-space: normal; }
-  .mm-crname .ic { font-size: .9375rem; margin-top: .0625rem; }
+  .mm-crname { display: inline-flex; align-items: center; gap: .625rem; color: var(--mm-blue); text-decoration: none; font-weight: 500; line-height: 1.3; white-space: normal; }
+  .mm-crthumb { flex: none; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: .5rem; overflow: hidden; background: var(--mm-fill); color: var(--mm-label-2); box-shadow: inset 0 0 0 .5px var(--mm-sep); }
+  .mm-crthumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .mm-crthumb .ic { font-size: 1.125rem; }
   span.mm-crname { color: var(--mm-label); }
   .mm-crlist { display: flex; flex-direction: column; gap: .5rem; }
   .mm-crc { background: var(--mm-card); border-radius: .625rem; padding: .625rem; display: flex; flex-direction: column; gap: .5rem; box-shadow: 0 0 0 .5px var(--mm-sep); }
@@ -421,7 +423,7 @@ window.dash = (() => {
       <div class="mm-titles">
         <span class="mm-eyebrow t-cap">Media Market · Digital Team</span>
         <h1 class="mm-title t-large" id="large-title">Active Campaigns</h1>
-        <span class="mm-updated t-foot"><span class="live"></span><span id="updated">Updated Nov 1, 2026, 10:26 Kuwait time · refreshes Sun–Thu at 9:00</span></span>
+        <span class="mm-updated t-foot"><span class="live"></span><span id="updated">Updated Nov 2, 2026, 09:12 Kuwait time · refreshes Sun–Thu at 9:00</span></span>
       </div>
     </header>
 
@@ -1063,6 +1065,7 @@ window.dash = (() => {
 
   // ---------- creatives: active ads under a channel; r.creatives = [{id, name, today|last7|flight: {spend, impressions, clicks, results}, preview_url, preview_kind, preview_expires}]
   const CR_HOSTS = /^https:\/\/([a-z0-9-]+\.)*(facebook\.com|twimg\.com|tiktok\.com|snapchat\.com)\//;
+  const CR_THUMB = /^data:image\/(jpeg|png|webp);base64,/, CR_ICON = 'M4 5.5h16v13H4zM4 15l4.5-4 3.5 3 3-2.5 5 4';
   const creativesOf = r => [...(r.creatives || [])].sort((a, b) => Number((b.flight || {}).spend || 0) - Number((a.flight || {}).spend || 0));
   const crShort = n => { const t = String(n || 'Untitled ad'), i = t.lastIndexOf('_Ad '); return i > 0 ? t.slice(i + 1) : t; };
   function crLink(c) {
@@ -1073,8 +1076,18 @@ window.dash = (() => {
   function crName(c) {
     const l = crLink(c), n = l ? el('a', 'mm-crname') : el('span', 'mm-crname');
     if (l) { n.href = l.href; n.target = '_blank'; n.rel = 'noopener'; n.title = l.label; }
-    n.append(icon('M4 5.5h16v13H4zM4 15l4.5-4 3.5 3 3-2.5 5 4'), document.createTextNode(crShort(c.name)));
+    n.append(crThumb(c), document.createTextNode(crShort(c.name)));
     return n;
+  }
+  function crThumb(c) {
+    const box = el('span', 'mm-crthumb');
+    if (c.thumb && CR_THUMB.test(c.thumb)) {
+      const i = el('img'); i.src = c.thumb; i.alt = ''; i.loading = 'lazy'; i.decoding = 'async';
+      if (c.thumb_from) box.title = 'Thumbnail from Meta: ' + c.thumb_from;
+      i.addEventListener('error', () => i.replaceWith(icon(CR_ICON)));
+      box.appendChild(i);
+    } else box.appendChild(icon(CR_ICON));
+    return box;
   }
   function crNums(c, w) {
     const m = c[w] || {}, sp = m.spend, im = m.impressions, ck = m.clicks, rs = m.results;
