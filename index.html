@@ -423,7 +423,7 @@ window.dash = (() => {
       <div class="mm-titles">
         <span class="mm-eyebrow t-cap">Media Market · Digital Team</span>
         <h1 class="mm-title t-large" id="large-title">Active Campaigns</h1>
-        <span class="mm-updated t-foot"><span class="live"></span><span id="updated">Updated Nov 2, 2026, 10:35 Kuwait time · refreshes Sun–Thu at 9:00</span></span>
+        <span class="mm-updated t-foot"><span class="live"></span><span id="updated">Updated Nov 3, 2026, 09:15 Kuwait time · refreshes Sun–Thu at 9:00</span></span>
       </div>
     </header>
 
@@ -473,7 +473,7 @@ window.dash = (() => {
           <li><b>Today</b> is the current day so far. <b>Last 7 Days</b> is the 7 complete days before today. <b>Campaign Duration</b> runs from the tracker start date to today.</li>
           <li><b>Budget AM</b> is the full Budget AM of every Active and Launched tracker line for that brand (KD ÷ 0.316 × the client and platform % in each formula). Spend only covers connected lines.</li>
           <li><b>Pacing</b> compares spend through yesterday with an even spread of Budget AM over each tracked flight. In tables the bar shows budget spent and the tick shows time elapsed; each brand's ring shows its spend against its full Budget AM.</li>
-          <li><b>Campaigns</b> are collapsed: tap one to see its channels. Launched, pending, paused and completed campaigns sit at the bottom of each table with their status and date and show whole-flight totals.</li>
+          <li><b>Campaigns</b> are collapsed: tap one to see its channels. Active and launched campaigns are shown together; pending, paused and completed campaigns sit at the bottom of each table with their status and date and show whole-flight totals. Completed campaigns disappear once they are removed from the tracker.</li>
           <li><b>Results</b> use each platform's own goal: Meta results, TikTok form leads, clicks, follows or video plays, Snapchat leads (swipe-ups otherwise), Google Ads conversions, X engagements.</li>
           <li><b>Supplier lines</b> cost clicks × the agreed rate (Iconpeak display and sports $0.40, Landmark $0.40, Premium $0.70) and Shasha views × $0.025. McDonald's clicks come from Bitly; Toyota, Lexus and Al Sayer Corporate clicks are GA4 sessions, which run well below supplier-reported clicks.</li>
           <li><b>Red flag</b> means pacing below 80% once a line has run for 3 full days (before that it shows as To Watch, ramping up). Everything else that needs a look is <b>To Watch</b>: cost per lead above $25 (Toyota) or $50 (Lexus), spend over Budget AM, no spend today, frequency of 8+, paused search, lines due but not live.</li>
@@ -501,7 +501,8 @@ window.dash = (() => {
   const WLABEL = { today: 'Today', last7: 'Last 7 Days', flight: 'Campaign Duration' };
   const STATUS = { flag: ['Red flag', 'M10.3 4.3 2.8 17.5A2 2 0 0 0 4.5 20.5h15a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0zM12 9.5v4.5M12 17.2v.1'], watch: ['Watch', 'M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6'], ok: ['On plan', 'M5 12.5l4.5 4.5L19 7.5'], none: ['Not tracked', 'M8 12h8'], pending: ['Pending', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7.5V12l3 2'], paused: ['Paused', 'M9 6.5v11M15 6.5v11'], done: ['Completed', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8.5 12.2l2.4 2.4 4.6-4.8'] };
   const RANK = { flag: 0, watch: 1, ok: 2, pending: 3, paused: 4, done: 5, none: 6 };
-  const ORDER = { Launched: 0, Pending: 1, Paused: 2, Completed: 3 };
+  const ORDER = { Pending: 0, Paused: 1, Completed: 2 };
+  const isLive = r => r.sheet_status === 'Active' || r.sheet_status === 'Launched';   // Active and Launched lines are shown together
   const state = { w: 'today', open: new Set(), openCamps: new Set(), openCr: new Set(), openCh: new Set(), sheet: null, pass: null, keys: {}, lines: null, insights: null, sig: '' };
   const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -792,7 +793,7 @@ window.dash = (() => {
   const groupId = (client, campaign, isActive) => 'g-' + slug(client + '-' + campaign + (isActive ? '' : '-x'));
   function openLine(r) {
     state.open.add(r.client);
-    state.openCamps.add(groupId(r.client, r.campaign, r.sheet_status === 'Active'));
+    state.openCamps.add(groupId(r.client, r.campaign, isLive(r)));
     const sec = document.getElementById('brand-' + slug(r.client));
     if (!sec) return;
     const box = sec.querySelector('.mm-collapse');
@@ -931,8 +932,8 @@ window.dash = (() => {
     const th = el('thead'); th.appendChild(thr); tbl.appendChild(th);
     const tb = el('tbody'); const span = head.length;
     const groupsOf = list => { const gs = []; for (const r of list) { const g = gs.find(g => g.name === r.campaign); if (g) g.rows.push(r); else gs.push({ name: r.campaign, rows: [r] }); } return gs; };
-    const active = rows.filter(r => r.sheet_status === 'Active');
-    const rest = rows.filter(r => r.sheet_status !== 'Active').sort((a, c) => (ORDER[a.sheet_status] ?? 9) - (ORDER[c.sheet_status] ?? 9));
+    const active = rows.filter(isLive);
+    const rest = rows.filter(r => !isLive(r)).sort((a, c) => (ORDER[a.sheet_status] ?? 9) - (ORDER[c.sheet_status] ?? 9));
     const addGroup = (g, isActive) => {
       const id = groupId(g.rows[0].client, g.name, isActive);
       const open = state.openCamps.has(id);
@@ -962,7 +963,7 @@ window.dash = (() => {
     };
     groupsOf(active).forEach(g => addGroup(g, true));
     if (rest.length) {
-      const s = el('tr', 'sect'); const td = el('td', null, 'Launched, pending, paused and completed'); td.colSpan = span; s.appendChild(td); tb.appendChild(s);
+      const s = el('tr', 'sect'); const td = el('td', null, 'Pending, paused and completed'); td.colSpan = span; s.appendChild(td); tb.appendChild(s);
       groupsOf(rest).forEach(g => addGroup(g, false));
     }
     tbl.appendChild(tb); tw.appendChild(tbl);
@@ -984,12 +985,12 @@ window.dash = (() => {
     return wrap;
   }
 
-  // phone layout: same grouping as the table (active first, then launched / pending / paused / completed)
+  // phone layout: same grouping as the table (active and launched first, then pending / paused / completed)
   function channelList(rows, w) {
     const wrap = el('div', 'mm-cl');
     const groupsOf = list => { const gs = []; for (const r of list) { const g = gs.find(g => g.name === r.campaign); if (g) g.rows.push(r); else gs.push({ name: r.campaign, rows: [r] }); } return gs; };
-    const active = rows.filter(r => r.sheet_status === 'Active');
-    const rest = rows.filter(r => r.sheet_status !== 'Active').sort((a, c) => (ORDER[a.sheet_status] ?? 9) - (ORDER[c.sheet_status] ?? 9));
+    const active = rows.filter(isLive);
+    const rest = rows.filter(r => !isLive(r)).sort((a, c) => (ORDER[a.sheet_status] ?? 9) - (ORDER[c.sheet_status] ?? 9));
     const addGroup = (g, isActive) => {
       const id = groupId(g.rows[0].client, g.name, isActive);
       const open = state.openCamps.has(id);
@@ -1019,7 +1020,7 @@ window.dash = (() => {
       box.append(btn, cards); wrap.appendChild(box);
     };
     groupsOf(active).forEach(g => addGroup(g, true));
-    if (rest.length) { wrap.appendChild(el('div', 'mm-csect', 'Launched, pending, paused and completed')); groupsOf(rest).forEach(g => addGroup(g, false)); }
+    if (rest.length) { wrap.appendChild(el('div', 'mm-csect', 'Pending, paused and completed')); groupsOf(rest).forEach(g => addGroup(g, false)); }
     return wrap;
   }
   function channelCard(r, w) {
